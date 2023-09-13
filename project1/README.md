@@ -20,7 +20,7 @@
     and allows reads and writes to that array of integers (i.e. "memory") by the CPU.
 
 ### Compiling and Running
-1. To compile, run `g++ -std=c++17 main.cpp`
+1. To compile, run `g++ -std=c++11 main.cpp`
 2. This will produce an `a.out` binary that you can run on the machine
 3. The usage of `a.out` is `./a.out <program.txt> <X timer instructions>` where `<program.txt>`
     is this name of the program file holding your instructions and `<X timer instructions>` is
