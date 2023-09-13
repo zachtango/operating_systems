@@ -147,7 +147,7 @@ void CPU::FetchDecodeExecute() {
     // FDE
     IR = ReadNext();
 
-    auto fcn { Decode(IR) };
+    CPUFcnPtr fcn { Decode(IR) };
 
     (this->*fcn)();
 

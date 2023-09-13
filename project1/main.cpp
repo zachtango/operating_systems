@@ -6,6 +6,8 @@
 #include "cpu.h"
 #include <unistd.h>
 #include <signal.h>
+#include <iomanip>
+#include <sys/wait.h>
 
 int main(int argc, char **argv) {
     if (argc != 3) {
