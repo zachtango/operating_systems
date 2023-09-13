@@ -18,14 +18,14 @@ public:
     }
 
     // Load instructions into memory array
-    bool LoadProgram(std::string_view fileName);
+    bool LoadProgram(std::string fileName);
     
     // Interfacing functions for public to read and write from and to memory
     int Read(int address) { return M[address]; };
     void Write(int address, int data) { M[address] = data; };
 
     // Dumps memory array to given file
-    void DumpMemory(std::string_view fileName);
+    void DumpMemory(std::string fileName);
 private:
     // Memory array
     constexpr static const int numAddresses {2000};
@@ -34,7 +34,7 @@ private:
 };
 
 
-bool MMU::LoadProgram(std::string_view fileName) {
+bool MMU::LoadProgram(std::string fileName) {
     std::ifstream fin;
     
     fin.open(fileName);
@@ -75,7 +75,7 @@ bool MMU::LoadProgram(std::string_view fileName) {
     return true;
 }
 
-void MMU::DumpMemory(std::string_view fileName) {
+void MMU::DumpMemory(std::string fileName) {
     std::ofstream fout;
     
     fout.open(fileName);
