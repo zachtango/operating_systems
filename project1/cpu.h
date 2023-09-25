@@ -6,6 +6,7 @@
 #include <iostream>
 #include <functional>
 #include <fstream>
+#include <random>
 
 constexpr const int READ {0};
 constexpr const int WRITE {1};
@@ -215,8 +216,15 @@ void CPU::Store_Addr() {
 void CPU::Get() {
     std::cerr << "CPU::Get\n";
 
-    // FIXME make this random from 1 to 100
-    AC = 20;
+    // Seed the random number generator with a time-based seed
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    // Define the range for random numbers (1 to 100)
+    std::uniform_int_distribution<int> distribution(1, 100);
+
+    // Generate a random number
+    AC = distribution(gen);
 }
 
 void CPU::Put_Port() {
