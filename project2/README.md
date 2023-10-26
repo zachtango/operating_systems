@@ -10,6 +10,8 @@
     threads. The functions existing in this file match the pseudocode given in the design.
 
 ### test.py and test folder
+- DISCLAIMER: test.py does not work on the UTD CS servers because python is of version 2.7.5 while test.py was made for python 3.11.4.
+    Also, it may error out and say that too many files are open; in this case, run `ulimit -n 2048` to allow up to 2048 files to be open.
 - This is not part of the project, but I made a test script to confirm my simulation works correctly. It simulates 1250
     runs (50 for guests between 1 and 25) and stores the output in txt files in the test folder. Then it validates the
     output of those files. Again, this is not part of the actual project, just a tool I thought would be helpful for me.
