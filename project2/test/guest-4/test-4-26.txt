@@ -1,0 +1,40 @@
+Simulation starts
+Front desk employee 1 created
+Bellhop 1 created
+Guest 3 created
+Guest 0 created
+Front desk employee 0 created
+Bellhop 0 created
+Guest 1 created
+Guest 2 created
+Guest 3 enters hotel with 1 bag
+Front desk employee 1 registers guest 3 and assigns room 1
+Guest 1 enters hotel with 5 bags
+Guest 0 enters hotel with 4 bags
+Guest 3 receives room key for room 1 from front desk employee 1
+Guest 3 enters room 1
+Front desk employee 0 registers guest 1 and assigns room 2
+Guest 1 receives room key for room 2 from front desk employee 0
+Front desk employee 0 registers guest 0 and assigns room 3
+Guest 3 retires for the evening
+Guest 1 requests help with bags
+Bellhop 1 receives bags from guest 1
+Guest 1 enters room 2
+Guest 1 receives bags from bellhop 1 and gives tip
+Guest 1 retires for the evening
+Guest 0 receives room key for room 3 from front desk employee 0
+Guest 0 requests help with bags
+Guest 2 enters hotel with 1 bag
+Front desk employee 0 registers guest 2 and assigns room 4
+Bellhop 0 receives bags from guest 0
+Guest 0 enters room 3
+Guest 0 receives bags from bellhop 0 and gives tip
+Guest 0 retires for the evening
+Guest 0 joined
+Guest 1 joined
+Guest 2 receives room key for room 4 from front desk employee 0
+Guest 2 enters room 4
+Guest 2 retires for the evening
+Guest 2 joined
+Guest 3 joined
+Simulation ends

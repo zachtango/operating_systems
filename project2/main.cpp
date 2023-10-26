@@ -36,6 +36,7 @@ sem_t guestBellhopQueueMutex;
 sem_t guestDeskReady;
 sem_t guestBellhopReady;
 sem_t guestAssigned[MAX_NUM_GUESTS];
+sem_t guestTaken[MAX_NUM_GUESTS];
 sem_t guestDelivered[MAX_NUM_GUESTS];
 
 /* Desk employee semaphores */
@@ -47,7 +48,7 @@ sem_t tip[NUM_BELLHOP_EMPLOYEES];
 sem_t bellhopEmployees;
 
 /* Misc semaphores */
-sem_t coutMutex;
+sem_t printMutex;
 sem_t start;
 sem_t created;
 sem_t roomCountMutex;
@@ -82,15 +83,20 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    std::cout << "Simulation starts\n";
-
     NUM_GUESTS = atoi(argv[1]);
+
+    if (NUM_GUESTS < 1 || NUM_GUESTS > 25) {
+        std::cout << "<number of guests> must be between 1 and 25 inclusive\n";
+        return 0;
+    }
+
+    std::cout << "Simulation starts\n";
 
     // For random seed
     srand(time(NULL));
 
     // Initialize semaphores
-    sem_init(&coutMutex, 0, 1);
+    sem_init(&printMutex, 0, 1);
     sem_init(&start, 0, 0);
     sem_init(&created, 0, 0);
 
@@ -99,6 +105,12 @@ int main(int argc, char** argv) {
     sem_init(&guestDeskReady, 0, 0);
     for (int i = 0; i < NUM_GUESTS; i++) {
         sem_init(&guestAssigned[i], 0, 0);
+    }
+    for (int i = 0; i < NUM_GUESTS; i++) {
+        sem_init(&guestTaken[i], 0, 0);
+    }
+    for (int i = 0; i < NUM_GUESTS; i++) {
+        sem_init(&guestDelivered[i], 0, 0);
     }
     
     for (int i = 0; i < NUM_DESK_EMPLOYEES; i++) {
@@ -169,9 +181,9 @@ int main(int argc, char** argv) {
             fprintf(stderr,"thread %d terminated abnormally\n",worker);
             exit(1);
         } else {
-            sem_wait(&coutMutex);
+            sem_wait(&printMutex);
             std::cout << "Guest " << worker << " joined\n";
-            sem_post(&coutMutex);
+            sem_post(&printMutex);
         }
     }
 
@@ -181,9 +193,9 @@ int main(int argc, char** argv) {
 }
 
 void createPerson(const std::string &p, int id) {
-    sem_wait(&coutMutex);
+    sem_wait(&printMutex);
     std::cout << p << ' ' << id << " created\n";
-    sem_post(&coutMutex);
+    sem_post(&printMutex);
 
     sem_wait(&peopleCountMutex);
     peopleCount += 1;
@@ -199,10 +211,10 @@ void createPerson(const std::string &p, int id) {
 }
 
 void enterHotel(int guestNumber, int bags) {
-    sem_wait(&coutMutex);
+    sem_wait(&printMutex);
     std::cout << "Guest " << guestNumber << " enters hotel with " << bags <<
         (bags == 1 ? " bag\n" : " bags\n");
-    sem_post(&coutMutex);
+    sem_post(&printMutex);
 }
 
 void enqueue(std::queue<int> &q, int guestNumber, sem_t &queueMutex, sem_t &readyMutex) {
@@ -213,35 +225,35 @@ void enqueue(std::queue<int> &q, int guestNumber, sem_t &queueMutex, sem_t &read
 }
 
 void receiveKey(int guestNumber) {
-    sem_wait(&coutMutex);
+    sem_wait(&printMutex);
     std::cout << "Guest " << guestNumber << " receives room key for room " << guestRoom[guestNumber]
         << " from front desk employee " << guestDeskEmployeeNumber[guestNumber] << '\n';
-    sem_post(&coutMutex);
+    sem_post(&printMutex);
 }
 
 void requestHelp(int guestNumber) {
-    sem_wait(&coutMutex);
+    sem_wait(&printMutex);
     std::cout << "Guest " << guestNumber << " requests help with bags\n";
-    sem_post(&coutMutex);
+    sem_post(&printMutex);
 }
 
 void enterRoom(int guestNumber) {
-    sem_wait(&coutMutex);
+    sem_wait(&printMutex);
     std::cout << "Guest " << guestNumber << " enters room " << guestRoom[guestNumber] << '\n';
-    sem_post(&coutMutex);
+    sem_post(&printMutex);
 }
 
 void receiveBags(int guestNumber) {
-    sem_wait(&coutMutex);
+    sem_wait(&printMutex);
     std::cout << "Guest " << guestNumber << " receives bags from bellhop " << guestBellhopEmployeeNumber[guestNumber]
         << " and gives tip\n";
-    sem_post(&coutMutex);
+    sem_post(&printMutex);
 }
 
 void retire(int guestNumber) {
-    sem_wait(&coutMutex);
+    sem_wait(&printMutex);
     std::cout << "Guest " << guestNumber << " retires for the evening\n";
-    sem_post(&coutMutex);
+    sem_post(&printMutex);
 }
 
 void dequeue(std::queue<int> &q, int &guestNumber, sem_t &queueMutex) {
@@ -257,16 +269,16 @@ void assignRoom(int deskEmployeeNumber, int guestNumber) {
     roomCount += 1;
     sem_post(&roomCountMutex);
 
-    sem_wait(&coutMutex);
+    sem_wait(&printMutex);
     std::cout << "Front desk employee " << deskEmployeeNumber << " registers guest "
         << guestNumber << " and assigns room " << guestRoom[guestNumber] << '\n';
-    sem_post(&coutMutex);
+    sem_post(&printMutex);
 }
 
 void takeBags(int bellhopEmployeeNumber, int guestNumber) {
-    sem_wait(&coutMutex);
+    sem_wait(&printMutex);
     std::cout << "Bellhop " << bellhopEmployeeNumber << " receives bags from guest " << guestNumber << '\n';
-    sem_post(&coutMutex);
+    sem_post(&printMutex);
 }
 
 void *guest(void *arg) {
@@ -297,9 +309,11 @@ void *guest(void *arg) {
         // Wait for bellhop employee to be available
         sem_wait(&bellhopEmployees);
 
-        // Let bellhop employee at front desk know you're ready
+        // Let bellhop employee know you're ready
         enqueue(guestBellhopQueue, guestNumber, guestBellhopQueueMutex, guestBellhopReady);
         
+        // Wait for bags to be taken
+        sem_wait(&guestTaken[guestNumber]);
     }
 
     // Enter room
@@ -370,6 +384,9 @@ void *bellhopEmployee(void *arg) {
 
         // Take bags from guest
         takeBags(bellhopEmployeeNumber, guestNumber);
+
+        // Let guest know their bags are taken
+        sem_post(&guestTaken[guestNumber]);
 
         // Let guest know their bags were delivered
         sem_post(&guestDelivered[guestNumber]);
