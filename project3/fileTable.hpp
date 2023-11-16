@@ -4,23 +4,23 @@
 
 #include <string>
 #include <unordered_map>
-#include <utility>
+#include <tuple>
 
 
 
 class FileTable {
 public:
     void display() {
-        
+
     }
 
-    void add(const std::string& name, int block, int length) {
+    void add(const std::string& name, int block, int length, int size) {
         
         // Update disk representation (make disk friend)
         
 
         // Update in memory representation
-        fat[name] = {block, length};
+        fat[name] = {block, length, size};
     }
 
     void del(const std::string& name) {
@@ -37,6 +37,10 @@ public:
 
     }
 
+    std::tuple<int, int, int> get(const std::string& name) {
+        return fat.at(name);
+    }
+
 private:
 
     /*
@@ -46,9 +50,9 @@ private:
         length: 4 bits in disk
 
         In Memory representation
-        unordered_map<string, pair<int, int>>
+        unordered_map<string, tuple<int, int, int>>
     */
-    std::unordered_map<std::string, std::pair<int, int>> fat;
+    std::unordered_map<std::string, std::tuple<int, int, int>> fat;
 
 };
 

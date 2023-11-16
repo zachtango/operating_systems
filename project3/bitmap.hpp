@@ -4,6 +4,7 @@
 #define BITMAP_HPP
 
 #include "types.hpp"
+#include <iostream>
 
 class Bitmap {
 public:
@@ -13,7 +14,30 @@ public:
         }
     }
     
-    void display();
+    void display() {
+        std::cout << ' ';
+        for (int i = 0; i < 5; i++) {
+            std::cout << "-";
+        }
+        std::cout << "BITMAP";
+        for(int i = 0; i < 5; i++) {
+            std::cout << "-";
+        }
+        std::cout << '\n';
+        for (int i = 0; i < 16; i++) {
+            std::cout << '|';
+            for (int j = 0; j < 16; j++) {
+                std::cout << (bm[i * 16 + j] ? "x" : "o");
+            }
+            std::cout << "|\n";
+        }
+
+        std::cout << ' ';
+        for (int i = 0; i < 16; i++) {
+            std::cout << "-";
+        }
+        std::cout << "\n\n";
+    }
 
     // FIXME: add updates to disk block when this gets updated
 
@@ -32,8 +56,8 @@ public:
             if (!bm[i]) {
                 // FIXME: error
             }
+            bm[i] = false;
         }
-        bm[i] = false;
     }
 
     int firstFit(int n) {
