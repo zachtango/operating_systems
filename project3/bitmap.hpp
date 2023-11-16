@@ -12,6 +12,9 @@ public:
         for (int i = 0; i < NUM_BLOCKS; i++) {
             bm[i] = false;
         }
+
+        bm[0] = true;
+        bm[1] = true;
     }
     
     void display() {
@@ -68,7 +71,7 @@ public:
             Returns -1 if contiguous set doesn't exist
         */
 
-        int l = 0;
+        int l = 2;
 
         while (true) {
             while (l < NUM_BLOCKS && bm[l]) {
@@ -94,6 +97,16 @@ public:
         }
 
         return -1;
+    }
+
+    int numOpenBlocks() {
+        int counter = 0;
+        for (int i = 2; i < NUM_BLOCKS; i++) {
+            if (!bm[i]) {
+                counter += 1;
+            }
+        }
+        return counter;
     }
 
 private:

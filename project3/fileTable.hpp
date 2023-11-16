@@ -5,33 +5,42 @@
 #include <string>
 #include <unordered_map>
 #include <tuple>
-
+#include <iostream>
+#include <iomanip>
 
 
 class FileTable {
 public:
     void display() {
+        std::cout << ' ';
+        for (int i = 0; i < 4; i++) {
+            std::cout << "-";
+        }
+        std::cout << "FILE TABLE";
+        for (int i = 0; i < 4; i++) {
+            std::cout << "-";
+        }
+        std::cout << '\n';
 
+        std::cout << "| " << std::left << std::setw(9) << "Name" << std::setw(8) << "Length" << "|\n";
+
+        for (auto it : fat) {
+            std::cout << "| " << std::left << std::setw(9) << it.first << std::setw(7) << std::get<1>(it.second) << " |\n";
+        }
+        
+        std::cout << ' ';
+        for (int i = 0; i < 18; i++) {
+            std::cout << "-";
+        }
+        std::cout << '\n';
     }
 
     void add(const std::string& name, int block, int length, int size) {
-        
-        // Update disk representation (make disk friend)
-        
-
         // Update in memory representation
         fat[name] = {block, length, size};
     }
 
     void del(const std::string& name) {
-        if (fat.count(name) == 0) {
-            // FIXME throw err
-            return;
-        }
-
-        // Update disk representation
-        
-
         // Update in memory representation
         fat.erase(name);
 
@@ -39,6 +48,10 @@ public:
 
     std::tuple<int, int, int> get(const std::string& name) {
         return fat.at(name);
+    }
+
+    int count(const std::string& name) {
+        return fat.count(name);
     }
 
 private:

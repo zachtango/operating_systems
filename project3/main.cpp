@@ -1,9 +1,12 @@
 #include <iostream>
 #include "fileSystem.hpp"
 #include <string>
+#include <exception>
 
-void menu() {
-    std::cout << "1) Display a file\n" <<
+
+void menu(const std::string& alloc) {
+    std::cout << "-------- " << alloc << " --------\n" <<
+                 "1) Display a file\n" <<
                  "2) Display the file table\n" <<
                  "3) Display the free space bitmap\n" <<
                  "4) Display a disk block\n" <<
@@ -15,69 +18,99 @@ void menu() {
 
 int main() {
 
-    ContiguousFileSystem fs;
-
     int choice;
+
+    // File system selection
+    std::cout << "1) Contiguous\n" <<
+                 "2) Chained\n" <<
+                 "3) Indexed\n";
+
+    while (std::cout << "Select 1 - 3: " && !(std::cin >> choice) && (choice < 1 || choice > 3)) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
+
+    FileSystem* fs = nullptr;
+    std::string alloc;
+
+    switch (choice) {
+        case 1:
+            fs = new ContiguousFileSystem();
+            alloc = "Contiguous File System";
+            break;
+        case 2:
+            fs = new ChainedFileSystem();
+            alloc = "Chained File System";
+            break;
+        default:
+            fs = new IndexedFileSystem();
+            alloc = "Indexed File System";
+    }
+
     std::string srcFileName;
     std::string toFileName;
 
+    // File system user interface
     do {
-        menu();
+        menu(alloc);
         
-        std::cin >> choice;
-
+        while (std::cout << "Select 1 - 8: " && !(std::cin >> choice)) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+        
         switch (choice) {
             case 1:
                 std::cout << "Enter file name: ";
-                std::cin >> srcFileName;
-                fs.displayFile(srcFileName);
+                std::getline(std::cin, srcFileName);
+                std::getline(std::cin, srcFileName);
+                fs->displayFile(srcFileName);
                 break;
             case 2:
-                fs.displayFileTable();
+                fs->displayFileTable();
                 break;
             case 3:
-                fs.displayBitmap();
+                fs->displayBitmap();
                 break;
             case 4:
                 int diskBlock;
                 std::cout << "Enter disk block number (0 - 255): ";
                 std::cin >> diskBlock;
-                fs.displayDiskBlock(diskBlock);
+                fs->displayDiskBlock(diskBlock);
                 break;
             case 5:
                 std::cout << "Enter file name to copy from working directory: ";
-                std::cin >> srcFileName;
+                std::getline(std::cin, srcFileName);
+                std::getline(std::cin, srcFileName);
 
                 std::cout << "Enter file name to store copy as in file system: ";
-                std::cin >> toFileName;
+                std::getline(std::cin, toFileName);
 
-                fs.copyFromComputer(srcFileName, toFileName);
+                fs->copyFromComputer(srcFileName, toFileName);
                 break;
             case 6:
                 std::cout << "Enter file name to copy from file system: ";
-                std::cin >> srcFileName;
+                std::getline(std::cin, srcFileName);
+                std::getline(std::cin, srcFileName);
 
                 std::cout << "Enter file name to copy as in working directory: ";
-                std::cin >> toFileName;
+                std::getline(std::cin, toFileName);
 
-                fs.copyToComputer(srcFileName, toFileName);
+                fs->copyToComputer(srcFileName, toFileName);
                 break;
             case 7:
                 std::cout << "Enter file name to delete in file system: ";
-                std::cin >> srcFileName;
-                
-                fs.deleteFile(srcFileName);
+                std::getline(std::cin, srcFileName);
+                std::getline(std::cin, srcFileName);
+                fs->deleteFile(srcFileName);
                 break;
             case 8:
                 break;
-                break;
-            default:
-                std::cout << "Enter a number between 1 - 8: ";
         }
     
-
     } while (choice != 8);
 
+    delete fs;
 
     return 0;
 }

@@ -6,7 +6,11 @@
 
 class Block {
 public:
-    Block() {}
+    Block() {
+        for (int i = 0; i < NUM_BYTES_PER_BLOCK; i++) {
+            bytes[i] = 0;
+        }
+    }
 
     Block(const std::vector<char>& buffer, int numBytes) {
         for (int i = 0; i < numBytes; i++) {
@@ -30,6 +34,14 @@ public:
         for(int i = 0; i < numBytes; i++) {
             buffer.push_back(bytes[i]);
         }
+    }
+
+    void setByte(byte byte, int pos) {
+        bytes[pos] = byte;
+    }
+
+    byte getByte(int pos) {
+        return bytes[pos];
     }
 
 private:
