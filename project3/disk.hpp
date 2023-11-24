@@ -16,11 +16,17 @@ public:
         for (int i = 0; i < numBytes; i++) {
             this->bytes[i] = buffer[i];
         }
+        for (int i = numBytes; i < NUM_BYTES_PER_BLOCK; i++) {
+            this->bytes[i] = 0;
+        }
     }
 
     Block(const std::vector<char>& buffer, int l, int numBytes) {
         for (int i = 0; i < numBytes; i++) {
             this->bytes[i] = buffer[l + i];
+        }
+        for (int i = numBytes; i < NUM_BYTES_PER_BLOCK; i++) {
+            this->bytes[i] = 0;
         }
     }
 

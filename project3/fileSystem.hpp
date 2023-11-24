@@ -17,9 +17,19 @@ class FileSystem {
 
 public:
     void displayFile(const std::string& name) {
-        /*
-            what to display?? it's name and size?? what do w contents lol
-        */
+        try {
+            // Get file data from file system
+            std::vector<char> buffer = getFileData(name);
+
+            std::cout << "-------- " << name << " Contents --------\n";
+            for (auto &c : buffer) {
+                std::cout << c;
+            }
+
+            std::cout << '\n';
+        } catch (const std::out_of_range& e) {
+            std::cout << "File System Error: \"" << name << "\" does not exist in simulation\n";
+        }
     };
 
     void displayFileTable() {
@@ -30,11 +40,7 @@ public:
         bitmap.display();
     };
 
-    void displayDiskBlock(int block) {
-        // Get block from disk
-
-        // Display block ???
-    };
+    virtual void displayDiskBlock(int block) = 0;
 
     void copyToComputer(const std::string& name, const std::string& dest) {
         try {
@@ -52,7 +58,7 @@ public:
             // Write file data to file on comptuer
             fout.write(buffer.data(), buffer.size());
         } catch (const std::out_of_range& e) {
-            std::cout << "File System Error: \"" << name << "\" does not exist in file system\n";
+            std::cout << "File System Error: \"" << name << "\" does not exist in simulation\n";
         }
     }
 
@@ -67,7 +73,7 @@ public:
         }
         
         if (!validName) {
-            std::cout << "File System Error: Invalid file name \"" << name << "\"\n";
+            std::cout << "File System Error: Invalid file name, \"" << name << "\" contains non lowercase letter or is longer than 8 characters\n";
             return;
         }
 
@@ -97,6 +103,8 @@ public:
     
     virtual void deleteFile(const std::string& name) = 0;
 
+    virtual ~FileSystem() = default;
+
 protected:
     virtual void allocateFile(const std::string& name, int bytes, const std::vector<char>& buffer) = 0;
     virtual std::vector<char> getFileData(const std::string& name) = 0;
@@ -109,7 +117,7 @@ protected:
 
 class ContiguousFileSystem : public FileSystem {
 public:
-    void deleteFile(const std::string& name) override {
+    void deleteFile(const std::string& name) {
         try {
             // Get block start and length
             std::tuple<int, int, int> t = fat.get(name);
@@ -120,16 +128,34 @@ public:
             // Remove entry for file allocation table
             fat.del(name);
         } catch (const std::out_of_range& e) {
-            std::cout << "File system error: \"" << name << "\" does not exist in file system\n";
+            std::cout << "File system error: \"" << name << "\" does not exist in simulation\n";
         }
     }
 
+    void displayDiskBlock(int blockNumber) {
+        if (blockNumber == 0) {
+            displayFileTable();
+            return;
+        } else if (blockNumber == 1) {
+            displayBitmap();
+            return;
+        }
+
+        Block block = disk.getBlock(blockNumber);
+
+        // Block in a contiguous file system consists of only file data
+        for (int i = 0; i < NUM_BYTES_PER_BLOCK; i++) {
+            char c = block.getByte(i);
+            std::cout << c;
+        }
+        std::cout << '\n';
+    }
+
 private:
-    void allocateFile(const std::string& name, int bytes, const std::vector<char>& buffer) override {
+    void allocateFile(const std::string& name, int bytes, const std::vector<char>& buffer) {
         // File size in blocks
         int numBlocks = (bytes + NUM_BYTES_PER_BLOCK - 1) / NUM_BYTES_PER_BLOCK;
 
-        // FIXME: Max file size is 10 blocks
         if (numBlocks > 10) {
             std::cout << "File system error: File too big\n";
             return;
@@ -145,12 +171,10 @@ private:
         // Find first fit for contiguous set of numBlocks
         int l = bitmap.firstFit(numBlocks);
         
-        // Not able to find space for a contiguous set --> compact the memory
+        // Not able to find space for a contiguous set --> not enuf memory
         if (l == -1) {
-            compact();
-            
-            // After compaction, first fit should work
-            l = bitmap.firstFit(numBlocks);
+            std::cout << "File system error: Not enough space for file\n";
+            return;
         }
 
         // Allocate the contiguous set on the bitmap
@@ -158,7 +182,7 @@ private:
 
         // Add entry to file allocation table
         fat.add(name, l, numBlocks, buffer.size());
-
+        
         // Transfer data from buffer to disk
         for (int i = 0; i < numBlocks; i++) {
             Block block {buffer, i * NUM_BYTES_PER_BLOCK, std::min(bytes - (i * NUM_BYTES_PER_BLOCK), NUM_BYTES_PER_BLOCK)};
@@ -166,7 +190,7 @@ private:
         }
     }
 
-    std::vector<char> getFileData(const std::string& name) override {
+    std::vector<char> getFileData(const std::string& name) {
         // Get block start, length, and byte length
         std::tuple<int, int, int> t = fat.get(name);
 
@@ -174,11 +198,13 @@ private:
         std::vector<char> buffer;
 
         // File size in bytes
+        int blockIndex = std::get<0>(t);
+        int numBlocks = std::get<1>(t);
         int numBytes = std::get<2>(t);
 
         // Transfer all the blocks of data to the buffer
-        for (int i = 0; i < std::get<1>(t); i++) {
-            Block block = disk.getBlock(std::get<0>(t));
+        for (int i = 0; i < numBlocks; i++) {
+            Block block = disk.getBlock(blockIndex + i);
 
             block.copy(buffer, std::min(numBytes, NUM_BYTES_PER_BLOCK));
 
@@ -186,10 +212,6 @@ private:
         }
 
         return buffer;
-    }
-
-    void compact() {
-
     }
 
 };
@@ -221,19 +243,39 @@ public:
             // Remove entry for file allocation table
             fat.del(name);
         } catch (const std::out_of_range& e) {
-            std::cout << "File system error: \"" << name << "\" does not exist in file system\n";
+            std::cout << "File system error: \"" << name << "\" does not exist in simulation\n";
         }
     }
 
+    void displayDiskBlock(int blockNumber) {
+        if (blockNumber == 0) {
+            displayFileTable();
+            return;
+        } else if (blockNumber == 1) {
+            displayBitmap();
+            return;
+        }
+
+        Block block = disk.getBlock(blockNumber);
+
+        // Ignore last byte since that's a pointer in chained file allocation
+        for (int i = 0; i < NUM_BYTES_PER_BLOCK - 1; i++) {
+            char c = block.getByte(i);
+            std::cout << c;
+        }
+
+        std::cout << '\n';
+    }
+
 private:
-    void allocateFile(const std::string& name, int bytes, const std::vector<char>& buffer) override {
+    void allocateFile(const std::string& name, int bytes, const std::vector<char>& buffer) {
         // File size in blocks
         int numBlocks = (bytes + NUM_BYTES_PER_BLOCK - 1) / NUM_BYTES_PER_BLOCK;
 
         // Add the extra byte at the end of each block to account for the pointer used in chained allocation
         numBlocks = (bytes + numBlocks - 1 + NUM_BYTES_PER_BLOCK - 1) / NUM_BYTES_PER_BLOCK;
-        // FIXME: Max file size is 10 blocks
-        if (numBlocks > 11) {
+
+        if (numBlocks > 10) {
             std::cout << "File system error: File too big\n";
             return;
         }
@@ -272,7 +314,7 @@ private:
 
     }
 
-    std::vector<char> getFileData(const std::string& name) override {
+    std::vector<char> getFileData(const std::string& name) {
         // Buffer for holding file data
         std::vector<char> buffer;
 
@@ -328,17 +370,50 @@ public:
             // Remove entry for file allocation table
             fat.del(name);
         } catch (const std::out_of_range& e) {
-            std::cout << "File system error: \"" << name << "\" does not exist in file system\n";
+            std::cout << "File system error: \"" << name << "\" does not exist in simulation\n";
         }
     }
 
+    void displayDiskBlock(int blockNumber) {
+        if (blockNumber == 0) {
+            displayFileTable();
+            return;
+        } else if (blockNumber == 1) {
+            displayBitmap();
+            return;
+        }
+        
+        std::vector<std::tuple<int, int, int>> res = fat.getValues();
+
+        for (auto t : res) {
+            int blockIndex = std::get<0>(t);
+            if (blockIndex == blockNumber) {
+                std::cout << "File Index Block:\n";
+                int numBlocks = std::get<1>(t);
+                Block block = disk.getBlock(blockIndex);
+                for (int i = 0; i < numBlocks - 1; i++) {
+                    std::cout << " - " << static_cast<int>(block.getByte(i)) << '\n';
+                }
+                return;
+            }
+        }
+
+        Block block = disk.getBlock(blockNumber);
+
+        // Display all contents of block
+        for (int i = 0; i < NUM_BYTES_PER_BLOCK - 1; i++) {
+            char c = block.getByte(i);
+            std::cout << c;
+        }
+
+        std::cout << '\n';
+    }
 
 private:
-    void allocateFile(const std::string& name, int bytes, const std::vector<char>& buffer) override {
+    void allocateFile(const std::string& name, int bytes, const std::vector<char>& buffer) {
         // File size in blocks (1 extra block to hold index table)
         int numBlocks = (bytes + NUM_BYTES_PER_BLOCK - 1) / NUM_BYTES_PER_BLOCK + 1;
 
-        // FIXME: Max file size is 10 blocks
         if (numBlocks > 10) {
             std::cout << "File system error: File too big\n";
             return;
@@ -387,7 +462,7 @@ private:
         fat.add(name, s, numBlocks, buffer.size());
     }
 
-    std::vector<char> getFileData(const std::string& name) override {
+    std::vector<char> getFileData(const std::string& name) {
         // Buffer for holding file data
         std::vector<char> buffer;
 

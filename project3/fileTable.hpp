@@ -50,6 +50,16 @@ public:
         return fat.at(name);
     }
 
+    std::vector<std::tuple<int, int, int>> getValues() {
+        std::vector<std::tuple<int, int, int>> res;
+
+        for (auto it = fat.begin(); it != fat.end(); ++it) {
+            res.push_back(it->second);
+        }
+        
+        return res;
+    }
+
     int count(const std::string& name) {
         return fat.count(name);
     }

@@ -25,11 +25,11 @@ int main() {
                  "2) Chained\n" <<
                  "3) Indexed\n";
 
-    while (std::cout << "Select 1 - 3: " && !(std::cin >> choice) && (choice < 1 || choice > 3)) {
+    while (std::cout << "Select 1 - 3: " && (!(std::cin >> choice) || (choice < 1 || choice > 3))) {
         std::cin.clear();
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
-
+    
     FileSystem* fs = nullptr;
     std::string alloc;
 
@@ -74,29 +74,36 @@ int main() {
                 break;
             case 4:
                 int diskBlock;
-                std::cout << "Enter disk block number (0 - 255): ";
-                std::cin >> diskBlock;
+
+                while (std::cout << "Enter disk block number (0 - 255): " && (!(std::cin >> diskBlock) || (diskBlock < 0 || diskBlock > 255))) {
+                    std::cin.clear();
+                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                }
+                std::cout << "Disk block: " << diskBlock << '\n';
+
                 fs->displayDiskBlock(diskBlock);
                 break;
             case 5:
-                std::cout << "Enter file name to copy from working directory: ";
+                std::cout << "Copy from: ";
                 std::getline(std::cin, srcFileName);
                 std::getline(std::cin, srcFileName);
 
-                std::cout << "Enter file name to store copy as in file system: ";
-                std::getline(std::cin, toFileName);
-
-                fs->copyFromComputer(srcFileName, toFileName);
-                break;
-            case 6:
-                std::cout << "Enter file name to copy from file system: ";
-                std::getline(std::cin, srcFileName);
-                std::getline(std::cin, srcFileName);
-
-                std::cout << "Enter file name to copy as in working directory: ";
+                std::cout << "Copy to: ";
                 std::getline(std::cin, toFileName);
 
                 fs->copyToComputer(srcFileName, toFileName);
+
+                break;
+            case 6:
+                std::cout << "Copy from: ";
+                std::getline(std::cin, srcFileName);
+                std::getline(std::cin, srcFileName);
+
+                std::cout << "Copy to: ";
+                std::getline(std::cin, toFileName);
+
+                fs->copyFromComputer(srcFileName, toFileName);
+
                 break;
             case 7:
                 std::cout << "Enter file name to delete in file system: ";
@@ -105,6 +112,7 @@ int main() {
                 fs->deleteFile(srcFileName);
                 break;
             case 8:
+                std::cout << "Exiting...\n";
                 break;
         }
     
