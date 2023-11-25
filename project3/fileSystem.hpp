@@ -21,11 +21,11 @@ public:
             // Get file data from file system
             std::vector<char> buffer = getFileData(name);
 
+            // Print contents
             std::cout << "-------- " << name << " Contents --------\n";
             for (auto &c : buffer) {
                 std::cout << c;
             }
-
             std::cout << '\n';
         } catch (const std::out_of_range& e) {
             std::cout << "File System Error: \"" << name << "\" does not exist in simulation\n";
@@ -33,10 +33,12 @@ public:
     };
 
     void displayFileTable() {
+        // Display the file table
         fat.display();
     }
 
     void displayBitmap() {
+        // Display the bitmap
         bitmap.display();
     };
 
@@ -77,6 +79,7 @@ public:
             return;
         }
 
+        // Delete existing file with same name
         if (fat.count(name)) {
             deleteFile(name);
         }
@@ -133,6 +136,7 @@ public:
     }
 
     void displayDiskBlock(int blockNumber) {
+        // Reserved blocks have special printing
         if (blockNumber == 0) {
             displayFileTable();
             return;
@@ -141,6 +145,7 @@ public:
             return;
         }
 
+        // Get the block
         Block block = disk.getBlock(blockNumber);
 
         // Block in a contiguous file system consists of only file data
@@ -248,6 +253,7 @@ public:
     }
 
     void displayDiskBlock(int blockNumber) {
+        // Reserved blocks have special printing
         if (blockNumber == 0) {
             displayFileTable();
             return;
@@ -256,6 +262,7 @@ public:
             return;
         }
 
+        // Get the block
         Block block = disk.getBlock(blockNumber);
 
         // Ignore last byte since that's a pointer in chained file allocation
@@ -375,6 +382,7 @@ public:
     }
 
     void displayDiskBlock(int blockNumber) {
+        // Reserved blocks have special printing
         if (blockNumber == 0) {
             displayFileTable();
             return;
@@ -383,6 +391,7 @@ public:
             return;
         }
         
+        // Check if block is an index block --> special printing
         std::vector<std::tuple<int, int, int>> res = fat.getValues();
 
         for (auto t : res) {
@@ -398,6 +407,7 @@ public:
             }
         }
 
+        // Block is not a reserved block or index block
         Block block = disk.getBlock(blockNumber);
 
         // Display all contents of block

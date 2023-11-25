@@ -9,7 +9,6 @@ constexpr const int NUM_BLOCKS {256};
 
 using byte = uint8_t;
 
-
 #endif
 
 

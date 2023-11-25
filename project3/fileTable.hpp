@@ -12,6 +12,7 @@
 class FileTable {
 public:
     void display() {
+        // Print title
         std::cout << ' ';
         for (int i = 0; i < 4; i++) {
             std::cout << "-";
@@ -21,7 +22,8 @@ public:
             std::cout << "-";
         }
         std::cout << '\n';
-
+        
+        // Print body
         std::cout << "| " << std::left << std::setw(9) << "Name" << std::setw(8) << "Length" << "|\n";
 
         for (auto it : fat) {
@@ -47,10 +49,12 @@ public:
     }
 
     std::tuple<int, int, int> get(const std::string& name) {
+        // Get values of a file: block index, number of blocks, number of bytes
         return fat.at(name);
     }
 
     std::vector<std::tuple<int, int, int>> getValues() {
+        // Get all values existing in the file table
         std::vector<std::tuple<int, int, int>> res;
 
         for (auto it = fat.begin(); it != fat.end(); ++it) {

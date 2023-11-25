@@ -5,19 +5,23 @@
 
 #include "types.hpp"
 #include <iostream>
+#include <exception>
 
 class Bitmap {
 public:
     Bitmap() {
+        // Initialize empty bitmap
         for (int i = 0; i < NUM_BLOCKS; i++) {
             bm[i] = false;
         }
 
+        // Reserve space for 
         bm[0] = true;
         bm[1] = true;
     }
     
     void display() {
+        // Title of bitmap
         std::cout << ' ';
         for (int i = 0; i < 5; i++) {
             std::cout << "-";
@@ -27,6 +31,8 @@ public:
             std::cout << "-";
         }
         std::cout << '\n';
+
+        // Body of bitmap
         for (int i = 0; i < 16; i++) {
             std::cout << '|';
             for (int j = 0; j < 16; j++) {
@@ -42,22 +48,21 @@ public:
         std::cout << "\n\n";
     }
 
-    // FIXME: add updates to disk block when this gets updated
-
     void allocate(int l, int n) {
-        // Mark blocks from i to i + n - 1 as allocated
+        // Allocate blocks from i to i + n - 1
         for (int i = l; i < l + n; i++){
             if (bm[i]) {
-                // FIXME: error
+                throw std::runtime_error("Allocating reserved block\n");
             }
             bm[i] = true;
         }
     }
 
     void deallocate(int l, int n) {
+        // Deallocate blocks from i to i + n - 1
         for (int i = l; i < l + n; i++) {
             if (!bm[i]) {
-                // FIXME: error
+                throw std::runtime_error("Deallocating unallocated block\n");
             }
             bm[i] = false;
         }
@@ -100,6 +105,8 @@ public:
     }
 
     int numOpenBlocks() {
+        // Count the number of open blocks that can be allocated
+
         int counter = 0;
         for (int i = 2; i < NUM_BLOCKS; i++) {
             if (!bm[i]) {
@@ -111,7 +118,6 @@ public:
 
 private:
     bool bm[NUM_BLOCKS];
-
 };
 
 

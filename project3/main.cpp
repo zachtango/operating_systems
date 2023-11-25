@@ -33,6 +33,7 @@ int main() {
     FileSystem* fs = nullptr;
     std::string alloc;
 
+    // Instantiate file system based on choice
     switch (choice) {
         case 1:
             fs = new ContiguousFileSystem();
@@ -52,13 +53,16 @@ int main() {
 
     // File system user interface
     do {
+        // Display menu for user
         menu(alloc);
         
+        // Accept user choice
         while (std::cout << "Select 1 - 8: " && !(std::cin >> choice)) {
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
         
+        // Fulfill user choice
         switch (choice) {
             case 1:
                 std::cout << "Enter file name: ";
