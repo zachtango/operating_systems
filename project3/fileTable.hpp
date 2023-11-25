@@ -14,24 +14,27 @@ public:
     void display() {
         // Print title
         std::cout << ' ';
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 8; i++) {
             std::cout << "-";
         }
         std::cout << "FILE TABLE";
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 8; i++) {
             std::cout << "-";
         }
         std::cout << '\n';
         
         // Print body
-        std::cout << "| " << std::left << std::setw(9) << "Name" << std::setw(8) << "Length" << "|\n";
+        std::cout << "| " << std::left << std::setw(9) << "Name" << std::setw(8) << "Start" << std::setw(7) << "Length" << " |\n";
 
         for (auto it : fat) {
-            std::cout << "| " << std::left << std::setw(9) << it.first << std::setw(7) << std::get<1>(it.second) << " |\n";
+            std::cout << "| " << std::left <<
+                std::setw(9) << it.first <<
+                std::setw(8) << std::get<0>(it.second) <<
+                std::setw(7) << std::get<1>(it.second)  << " |\n";
         }
         
         std::cout << ' ';
-        for (int i = 0; i < 18; i++) {
+        for (int i = 0; i < 26; i++) {
             std::cout << "-";
         }
         std::cout << '\n';
